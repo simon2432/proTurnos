@@ -14,11 +14,11 @@ function AgendaC() {
   const [mostrarInfo, setMostrarInfo] = useState(false);
   const [infoEspecialista, setInfoEspecialista] = useState(null);
   const [turnosDisponibles, setTurnosDisponibles] = useState([]);
-  const [turnosOcupados, setTurnosOcupados] = useState([]);
   const [selectedYear, setSelectedYear] = useState(new Date().getFullYear());
   const [selectedMonth, setSelectedMonth] = useState(new Date().getMonth() + 1);
   const [selectedDay, setSelectedDay] = useState(new Date().getDate());
   const [errorMessage, setErrorMessage] = useState(""); // Mensaje de error
+  const [loading, setLoading] = useState(false);
 
   // Estado para la ventana modal
   const [modalVisible, setModalVisible] = useState(false);
@@ -36,8 +36,19 @@ function AgendaC() {
 
   useEffect(() => {
     fetch("http://localhost:3003/especialistas")
-      .then((response) => response.json())
-      .then((data) => setEspecialistas(data))
+      .then((response) => {
+        if (!response.ok) {
+          throw new Error("Error al cargar especialistas");
+        }
+        return response.json();
+      })
+      .then((data) => {
+        if (data.success) {
+          setEspecialistas(data.data || []);
+        } else {
+          console.error("Error al cargar especialistas:", data.message);
+        }
+      })
       .catch((error) =>
         console.error("Error al cargar los especialistas:", error)
       );
@@ -78,16 +89,30 @@ function AgendaC() {
   };
 
   const fetchTurnosOcupados = (fecha) => {
+    setLoading(true);
     const url = `http://localhost:3003/turnos-ocupados/${especialista}/${fecha}`;
     fetch(url)
-      .then((response) => response.json())
-      .then((data) => {
-        setTurnosOcupados(data);
-        generateTurnosDisponibles(data); // Pasar los turnos ocupados directamente a generateTurnosDisponibles
+      .then((response) => {
+        if (!response.ok) {
+          throw new Error("Error al cargar turnos ocupados");
+        }
+        return response.json();
       })
-      .catch((error) =>
-        console.error("Error al cargar los turnos ocupados:", error)
-      );
+      .then((data) => {
+        if (data.success) {
+          generateTurnosDisponibles(data.data || []);
+        } else {
+          console.error("Error al cargar turnos ocupados:", data.message);
+          setTurnosDisponibles([]);
+        }
+      })
+      .catch((error) => {
+        console.error("Error al cargar los turnos ocupados:", error);
+        setTurnosDisponibles([]);
+      })
+      .finally(() => {
+        setLoading(false);
+      });
   };
 
   const generateTurnosDisponibles = (turnosOcupadosData) => {
@@ -101,7 +126,7 @@ function AgendaC() {
       let endTime = new Date(`1970-01-01T${end}`);
       const turnosOcupadosSet = new Set(
         turnosOcupadosData.map((hora) => hora.slice(0, 5))
-      ); // Usar directamente turnosOcupadosData
+      );
       while (startTime < endTime) {
         const formattedTime = startTime.toTimeString().slice(0, 5);
         const ocupado = turnosOcupadosSet.has(formattedTime);
@@ -141,11 +166,18 @@ function AgendaC() {
     })
       .then((response) => response.json())
       .then((data) => {
-        console.log("Turno creado con éxito:", data);
-        setModalVisible(false);
-        navigate("/turnosc"); // Redirigir a TurnosC
+        if (data.success) {
+          console.log("Turno creado con éxito:", data);
+          setModalVisible(false);
+          navigate("/turnosc"); // Redirigir a TurnosC
+        } else {
+          alert(data.message || "Error al crear el turno");
+        }
       })
-      .catch((error) => console.error("Error al reservar el turno:", error));
+      .catch((error) => {
+        console.error("Error al reservar el turno:", error);
+        alert("Error de conexión al reservar el turno");
+      });
   };
 
   const handleCancelarReserva = () => {
@@ -163,35 +195,59 @@ function AgendaC() {
   const handleVerInfo = () => {
     if (especialista) {
       fetch(`http://localhost:3003/especialis/${especialista}`)
-        .then((response) => response.json())
-        .then((data) => {
-          setInfoEspecialista(data);
-          setMostrarInfo(true);
+        .then((response) => {
+          if (!response.ok) {
+            throw new Error("Error al cargar información del especialista");
+          }
+          return response.json();
         })
-        .catch((error) =>
+        .then((data) => {
+          if (data.success) {
+            setInfoEspecialista(data.data || data);
+            setMostrarInfo(true);
+          } else {
+            alert(
+              data.message || "Error al cargar información del especialista"
+            );
+          }
+        })
+        .catch((error) => {
           console.error(
             "Error al cargar la información del especialista:",
             error
-          )
-        );
+          );
+          alert("Error de conexión al cargar información del especialista");
+        });
     }
   };
 
   const handleVerTurnos = () => {
     if (especialista) {
       fetch(`http://localhost:3003/especialis/${especialista}`)
-        .then((response) => response.json())
-        .then((data) => {
-          setInfoEspecialista(data);
-          setMostrarInfo(false);
-          handleBuscarTurnos();
+        .then((response) => {
+          if (!response.ok) {
+            throw new Error("Error al cargar información del especialista");
+          }
+          return response.json();
         })
-        .catch((error) =>
+        .then((data) => {
+          if (data.success) {
+            setInfoEspecialista(data.data || data);
+            setMostrarInfo(false);
+            handleBuscarTurnos();
+          } else {
+            alert(
+              data.message || "Error al cargar información del especialista"
+            );
+          }
+        })
+        .catch((error) => {
           console.error(
             "Error al cargar la información del especialista:",
             error
-          )
-        );
+          );
+          alert("Error de conexión al cargar información del especialista");
+        });
     }
   };
 
@@ -299,10 +355,10 @@ function AgendaC() {
                 Buscar turnos
               </button>
             </div>
-            {errorMessage && <p className="error-message">{errorMessage}</p>}{" "}
-            {/* Mostrar mensaje de error */}
+            {errorMessage && <p className="error-message">{errorMessage}</p>}
+            {loading && <p className="loading">Cargando turnos...</p>}
             <div className="turnos-disponibles">
-              {turnosDisponibles.length === 0 && !errorMessage ? (
+              {turnosDisponibles.length === 0 && !errorMessage && !loading ? (
                 <p>-</p>
               ) : (
                 turnosDisponibles.map((turno, index) => (
@@ -325,7 +381,7 @@ function AgendaC() {
         {modalVisible && (
           <div className="modal">
             <div className="modal-content">
-              <p style={{ color: "#000" }}>
+              <p>
                 ¿Reservar turno el {selectedDay}/{selectedMonth}/{selectedYear}{" "}
                 a las {turnoSeleccionado?.hora}?
               </p>

@@ -1,0 +1,86 @@
+/* Fondo oscuro y modal centrado */
+.modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.7); /* Fondo oscuro con transparencia */
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+}
+
+.modal-overlay p {
+    color: #000;
+}
+
+.infoe-container {
+    width: 350px; /* Ajusta según necesidades */
+    background-color: #fff;
+    padding-right: 20px;
+    padding-left: 20px;
+    padding-top: 5px;
+    padding-bottom: 5px;
+    border-radius: 10px;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.3); /* Sombra para darle un efecto elevado */
+    font-family: Arial, sans-serif;
+    z-index: 1001;
+    position: relative;
+}
+
+.espa {
+    width: 100px; /* Tamaño de la imagen de perfil */
+    height: 100px;
+    border-radius: 50%; /* Para hacer la imagen circular */
+    background-color: #ccc; /* Color de fondo si no hay imagen */
+    background-size: cover;
+    background-position: center;
+}
+
+.profile {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    gap: 10px; /* Espacio entre la imagen y los detalles */
+}
+
+.profile-details ul {
+    list-style: none;
+    padding: 0;
+}
+
+.profile-details ul li {
+    margin: 5px 0;
+    color: #333;
+    font-size: 16px;
+}
+
+.profile-details ul li img {
+    margin-right: 10px;
+}
+
+.return-button {
+    display: block;
+    width: 100%;
+    padding: 10px 0;
+    background-color: #6200ea;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    text-align: center;
+    margin-top: 20px;
+}
+
+.return-button:hover {
+    background-color: #5701a3;
+}
+
+.ub {
+    width: 20px;
+    vertical-align: middle;
+    margin-right: 5px;
+}

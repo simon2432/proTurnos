@@ -1,0 +1,64 @@
+.cuerpo-perfilc {
+    position: absolute;
+    top: 0;
+    left: 250px;
+    right: 0;
+    bottom: 0;
+    background-color: #fff;
+    color: #000;
+    overflow: auto;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 20px; /* Espacio alrededor del contenido */
+}
+
+.perfil-content {
+    width: 50%; /* O ajusta según la amplitud deseada */
+    background-color: #f9f9f9; /* Color de fondo para el formulario */
+    padding: 40px;
+    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+    border-radius: 10px;
+}
+
+.infor{
+    color: #000000;
+    font-size: 40px;
+    margin-top: 0px;
+    font-weight: 700;
+}
+
+.perfil-content label {
+    display: block;
+    margin-bottom: 10px;
+    color: #666;
+}
+
+.perfil-content input {
+    background-color: #ffffff;
+    border-radius: 10px;
+    padding: 5px;
+    width: 100%;
+    color: #000;
+}
+
+.perfil-content input::placeholder {
+    color: #000;
+    padding: 2px;
+}
+
+.perfil-content button {
+    display: block;
+    width: 100%;
+    padding: 10px;
+    background-color: #6200ea;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    margin-top: 20px;
+    cursor: pointer;
+}
+
+.perfil-content button:hover {
+    background-color: #5701a3;
+}

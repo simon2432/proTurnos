@@ -1,0 +1,110 @@
+.cuerpo-turnose {
+    background-color: #f9f9f9;
+    padding: 20px;
+    width: 80%;
+    margin: 50px auto;
+    margin-left: 280px;
+    margin-bottom: 50vh;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+    border-radius: 10px;
+    text-align: center;
+    color: #000;
+}
+
+
+.turo {
+    font-size: 40px;
+    color: #000;
+    font-weight: bold;
+    margin-bottom: 20px;
+}
+
+/* Overlay para oscurecer el fondo */
+.overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.5); /* Fondo oscuro */
+    z-index: 1;
+}
+
+/* Estilo para el componente de turno seleccionado */
+.turno-container {
+    position: fixed;
+    top: 45%;
+    left: 55%;
+    transform: translate(-50%, -50%);
+    background-color: #fff;
+    padding: 20px;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+    width: 300px;
+    z-index: 2; /* Asegura que el turno esté encima del overlay */
+    border-radius: 10px;
+}
+
+/* Estilo para el contenedor de la semana */
+.navegacion-semanal {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin-bottom: 20px;
+}
+
+.navegacion-semanal button {
+    background-color: #000;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    padding: 5px 10px;
+    cursor: pointer;
+    margin: 0 10px;
+}
+
+.navegacion-semanal button:hover {
+    background-color: #333;
+}
+
+.navegacion-semanal span {
+    font-size: 18px;
+    font-weight: bold;
+    color: #000;
+}
+
+/* Estilo para la tabla de turnos */
+table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 20px;
+    text-align: center;
+    table-layout: fixed; /* Distribución fija de las columnas */
+}
+
+thead th {
+    background-color: #e0e0e0;
+    padding: 10px;
+    color: #000;
+    width: 14.28%; /* 100% dividido entre 7 días */
+}
+
+tbody td {
+    background-color: #f5f5f5;
+    padding: 10px;
+    color: #000;
+    width: 14.28%; /* 100% dividido entre 7 días */
+    vertical-align: top; /* Alineación de contenido en la parte superior */
+}
+
+.turno-hora {
+    background-color: #7c4dff;
+    color: #fff;
+    padding: 5px;
+    margin-top: 10px;
+    border-radius: 5px;
+    cursor: pointer;
+}
+
+.turno-hora:hover {
+    background-color: #6200ea;
+}

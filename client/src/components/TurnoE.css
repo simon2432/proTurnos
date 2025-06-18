@@ -1,0 +1,46 @@
+.turno-container {
+    background-color: #fff; /* Color de fondo */
+    padding: 20px; /* Espaciado interno */
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1); /* Sombra para darle profundidad */
+    width: 300px; /* Ancho del contenedor */
+    margin: 50px auto; /* Centrar vertical y horizontalmente */
+    border-radius: 10px; /* Bordes redondeados */
+}
+
+.turno-container button{
+    background-color: #6200ea;
+}
+
+.turno-container button:hover{
+    background-color: #5701a3;
+}
+
+.turno-detalles {
+    margin-bottom: 20px; /* Espacio antes de los botones */
+    color: #000;
+    text-align: center;
+}
+
+.tu {
+    font-size: 25px;
+    font-weight: bold;
+}
+
+.tar {
+    font-size: 20px;
+    font-weight: bold;
+}
+
+.turnoo-info, .paciente-info {
+    margin-bottom: 10px; /* Espacio entre secciones de información */
+}
+
+.turnoo-info span, .paciente-info span {
+    display: block; /* Asegura que cada elemento se muestre en su propia línea */
+    margin-bottom: 5px; /* Espacio entre líneas de texto */
+}
+
+.acciones {
+    display: flex; /* Alineación horizontal de los botones */
+    justify-content: space-between; /* Espaciado entre botones */
+}

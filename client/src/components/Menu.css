@@ -1,0 +1,45 @@
+.menu-container {
+    position: fixed;
+    left: 0;
+    top: 0;
+    bottom: 0;
+    width: 250px; /* Ajusta el ancho según necesites */
+    background-color: #890baf; /* Color de fondo del menú */
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    box-shadow: 2px 0 5px rgba(0, 0, 0, 0.5);
+    padding-top: 20px; /* Espaciado desde la parte superior del contenedor */
+}
+
+.logo img {
+    width: 60%; /* Tamaño del logo, ajustado para balance visual */
+    margin-bottom: 40%; /* Espaciado antes de los links */
+    margin-left: 20%;
+}
+
+.menu-links {
+    width: 80%;
+    display: flex;
+    flex-direction: column;
+    align-items: center; /* Centra los elementos del menú */
+}
+
+.menu-link {
+    width: 80%; /* Menor ancho para una apariencia más centrada */
+    border: none; /* Elimina las líneas separadoras */
+}
+
+.menu-icon {
+    height: 100px; /* Altura fija para todas las imágenes */
+    width: 100px; /* Ancho se ajusta manteniendo la proporción */
+    cursor: pointer; /* Cambia el cursor al pasar el ratón sobre el icono */
+    margin-left: 18%;
+    margin-top: 5px;
+    margin-bottom: 5px;
+}
+
+.menu-link:hover {
+    background-color: #9932CC; /* Color al pasar el ratón */
+    border-radius: 10px; /* Opcional: Añade redondeo a los botones */
+}

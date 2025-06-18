@@ -1,0 +1,36 @@
+.cuerpo-turnosc{
+    position: absolute;
+    top: 0;
+    left: 250px;
+    right: 0;
+    bottom: 0;
+    background-color: #fff;
+    overflow: auto;
+    display: flex;
+    flex-direction: column;
+}
+
+.tur{
+    font-size: 40px;
+    color: #000;
+    font-weight: 700;
+    margin-top: 5%;
+    margin-left: 18%;
+}
+
+.turnosc{
+    color: #000000;
+    margin-left: 18%;
+    margin-top: 4%;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+    background-color: #f9f9f9;
+    height: auto;
+    width: 60%;
+    display: flex;
+    flex-direction: column;
+}
+
+.notur{
+    margin-top: 8px;
+    margin-left: 10px;
+}

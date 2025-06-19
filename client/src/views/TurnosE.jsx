@@ -14,7 +14,12 @@ function TurnosE() {
 
   // Función para formatear la fecha en formato dd/mm/yyyy
   const formatDate = (date) => {
-    return date.toISOString().slice(0, 10);
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, "0");
+    const day = String(date.getDate()).padStart(2, "0");
+    const formatted = `${year}-${month}-${day}`;
+    console.log("TurnosE - formatDate:", date.toDateString(), "->", formatted);
+    return formatted;
   };
 
   // Función para obtener el inicio de la semana (lunes)
@@ -36,6 +41,10 @@ function TurnosE() {
       new Date(startOfWeek.getTime() + 6 * 24 * 60 * 60 * 1000)
     ); // Sumar 6 días
 
+    console.log("TurnosE - Cargando turnos para especialista:", user.dni);
+    console.log("TurnosE - Fecha inicio:", fechaInicio);
+    console.log("TurnosE - Fecha fin:", fechaFin);
+
     fetch(
       `http://localhost:3003/turnos-especialista/${user.dni}?fecha_inicio=${fechaInicio}&fecha_fin=${fechaFin}`
     )
@@ -46,9 +55,12 @@ function TurnosE() {
         return response.json();
       })
       .then((data) => {
+        console.log("TurnosE - Respuesta del servidor:", data);
         if (data.success) {
+          console.log("TurnosE - Turnos recibidos:", data.data);
           setTurnos(data.data || []);
         } else {
+          console.log("TurnosE - Error en la respuesta:", data.message);
           setError(data.message || "Error al cargar los turnos");
           setTurnos([]);
         }
@@ -83,6 +95,7 @@ function TurnosE() {
 
   // Función para volver a la vista de los turnos
   const volverATurnos = () => {
+    console.log("TurnosE - Volviendo a la vista de turnos");
     setSelectedTurno(null);
   };
 
@@ -105,9 +118,16 @@ function TurnosE() {
     };
   });
 
+  console.log(
+    "TurnosE - Días de la semana:",
+    dias.map((d) => ({ nombre: d.nombre, fecha: d.fecha.toDateString() }))
+  );
+  console.log("TurnosE - Turnos cargados:", turnos);
+
   return (
-    <div className={`cuerpo-turnose ${selectedTurno ? "blur-background" : ""}`}>
+    <div className="cuerpo-turnose">
       <Menu />
+      {selectedTurno && <div className="overlay"></div>}
       <div>
         {!selectedTurno ? (
           <>
@@ -130,7 +150,7 @@ function TurnosE() {
                     {dias.map((dia) => (
                       <th key={dia.nombre}>{`${
                         dia.nombre
-                      } ${dia.fecha.getDate()}/${
+                      } ${dia.fecha.getDate()}/$${
                         dia.fecha.getMonth() + 1
                       }`}</th>
                     ))}
@@ -142,11 +162,19 @@ function TurnosE() {
                       <td key={dia.nombre}>
                         {Array.isArray(turnos) &&
                           turnos
-                            .filter(
-                              (turno) =>
-                                new Date(turno.fecha).getDate() ===
-                                dia.fecha.getDate()
-                            )
+                            .filter((turno) => {
+                              const turnoFecha = new Date(turno.fecha);
+                              const diaFecha = dia.fecha;
+
+                              // Comparar fecha completa (día, mes y año)
+                              const sonMismaFecha =
+                                turnoFecha.getDate() === diaFecha.getDate() &&
+                                turnoFecha.getMonth() === diaFecha.getMonth() &&
+                                turnoFecha.getFullYear() ===
+                                  diaFecha.getFullYear();
+
+                              return sonMismaFecha;
+                            })
                             .map((turno) => (
                               <div
                                 key={turno.id}
@@ -164,14 +192,11 @@ function TurnosE() {
             </div>
           </>
         ) : (
-          <>
-            <div className="overlay"></div>
-            <TurnoE
-              turno={selectedTurno}
-              onVolver={volverATurnos}
-              cargarTurnos={cargarTurnos}
-            />
-          </>
+          <TurnoE
+            turno={selectedTurno}
+            onVolver={volverATurnos}
+            cargarTurnos={cargarTurnos}
+          />
         )}
       </div>
     </div>

@@ -23,24 +23,29 @@
   position: fixed;
   top: 0;
   left: 0;
-  width: 100%;
-  height: 100%;
-  background-color: rgba(0, 0, 0, 0.5); /* Fondo oscuro */
-  z-index: 1;
+  width: 100vw;
+  height: 100vh;
+  background: rgba(0, 0, 0, 0.5);
+  z-index: 100;
 }
 
 /* Estilo para el componente de turno seleccionado */
 .turno-container {
   position: fixed;
-  top: 45%;
-  left: 55%;
+  top: 50%;
+  left: 50%;
   transform: translate(-50%, -50%);
   background-color: #fff;
-  padding: 20px;
-  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
-  width: 300px;
-  z-index: 2; /* Asegura que el turno esté encima del overlay */
-  border-radius: 10px;
+  padding: 30px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+  width: 400px;
+  max-width: 90vw;
+  z-index: 101; /* Mayor que el overlay pero menor que el menú */
+  border-radius: 15px;
+  border: 2px solid #7c4dff;
+  /* Asegurar que estos estilos no sean sobrescritos */
+  margin: 0 !important;
+  display: block !important;
 }
 
 /* Estilo para el contenedor de la semana */
@@ -123,4 +128,9 @@ tbody td {
   border: 1px solid #ffcdd2;
   border-radius: 4px;
   margin: 10px 0;
+}
+
+/* Clase para aplicar blur al fondo cuando el modal está abierto */
+.blur-background {
+  filter: none; /* Remover el blur que estaba causando problemas */
 }

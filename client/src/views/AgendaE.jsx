@@ -5,8 +5,8 @@ import { useUser } from "../context/UserContext";
 
 function AgendaE() {
   const { user } = useUser();
-  const [horario1, setHorario1] = useState({ inicio: "09:00", fin: "13:00" });
-  const [horario2, setHorario2] = useState({ inicio: "14:00", fin: "18:00" });
+  const [horario1, setHorario1] = useState({ inicio: "N", fin: "N" });
+  const [horario2, setHorario2] = useState({ inicio: "N", fin: "N" });
   const [diasAtencion, setDiasAtencion] = useState({
     lunes: false,
     martes: false,
@@ -17,16 +17,67 @@ function AgendaE() {
     domingo: false,
   });
   const [rangoActual, setRangoActual] = useState({
-    rango1: "",
-    rango2: "",
+    rango1: "N - N",
+    rango2: "N - N",
   });
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
 
   // Función para formatear el tiempo a HH:MM
   const formatTime = (time) => {
-    if (!time || time === "N") return "N";
-    return time.slice(0, 5); // Eliminar los segundos
+    console.log("AgendaE - formatTime recibió:", time, "Tipo:", typeof time);
+
+    if (
+      !time ||
+      time === "N" ||
+      time === null ||
+      time === undefined ||
+      time === ""
+    ) {
+      console.log("AgendaE - formatTime retorna N (valor vacío)");
+      return "N";
+    }
+
+    // Si es un string, intentar formatearlo
+    if (typeof time === "string") {
+      // Si ya está en formato HH:MM, devolverlo
+      if (time.match(/^\d{2}:\d{2}$/)) {
+        console.log("AgendaE - formatTime retorna (HH:MM):", time);
+        return time;
+      }
+      // Si tiene segundos (HH:MM:SS), cortar a HH:MM
+      if (time.match(/^\d{2}:\d{2}:\d{2}$/)) {
+        const formatted = time.slice(0, 5);
+        console.log(
+          "AgendaE - formatTime retorna (HH:MM:SS -> HH:MM):",
+          formatted
+        );
+        return formatted;
+      }
+      // Si es solo un número, convertirlo a HH:MM
+      if (time.match(/^\d+$/)) {
+        const hours = Math.floor(time / 100);
+        const minutes = time % 100;
+        const formatted = `${hours.toString().padStart(2, "0")}:${minutes
+          .toString()
+          .padStart(2, "0")}`;
+        console.log(
+          "AgendaE - formatTime retorna (número -> HH:MM):",
+          formatted
+        );
+        return formatted;
+      }
+    }
+
+    // Si es un objeto Date o Time, convertirlo
+    if (time instanceof Date) {
+      const formatted = time.toTimeString().slice(0, 5);
+      console.log("AgendaE - formatTime retorna (Date -> HH:MM):", formatted);
+      return formatted;
+    }
+
+    console.log("AgendaE - formatTime retorna N (formato no reconocido)");
+    return "N";
   };
 
   // Función para cargar los datos del usuario
@@ -44,39 +95,163 @@ function AgendaE() {
         return response.json();
       })
       .then((data) => {
-        if (data.success) {
-          const userData = data.data || data;
-          setHorario1({
-            inicio: userData.rango1_inicio || "N",
-            fin: userData.rango1_fin || "N",
-          });
-          setHorario2({
-            inicio: userData.rango2_inicio || "N",
-            fin: userData.rango2_fin || "N",
-          });
+        console.log("AgendaE - Datos recibidos:", data);
+        console.log("AgendaE - Tipo de datos:", typeof data);
+        console.log("AgendaE - Es array:", Array.isArray(data));
 
-          setRangoActual({
-            rango1: `${formatTime(userData.rango1_inicio)} - ${formatTime(
-              userData.rango1_fin
-            )}`,
-            rango2: `${formatTime(userData.rango2_inicio)} - ${formatTime(
-              userData.rango2_fin
-            )}`,
-          });
+        // Los datos ahora vienen directamente, no envueltos en data.success
+        const userData = data;
 
-          const diasAtencionArray = userData.dias_atencion
-            ? userData.dias_atencion.split(",")
-            : [];
-          setDiasAtencion((prevState) => {
-            const newState = { ...prevState };
-            diasAtencionArray.forEach((dia) => {
-              newState[dia] = true;
-            });
-            return newState;
+        console.log(
+          "AgendaE - Rango1_inicio:",
+          userData.rango1_inicio,
+          "Tipo:",
+          typeof userData.rango1_inicio
+        );
+        console.log(
+          "AgendaE - Rango1_fin:",
+          userData.rango1_fin,
+          "Tipo:",
+          typeof userData.rango1_fin
+        );
+        console.log(
+          "AgendaE - Rango2_inicio:",
+          userData.rango2_inicio,
+          "Tipo:",
+          typeof userData.rango2_inicio
+        );
+        console.log(
+          "AgendaE - Rango2_fin:",
+          userData.rango2_fin,
+          "Tipo:",
+          typeof userData.rango2_fin
+        );
+        console.log(
+          "AgendaE - Dias_atencion:",
+          userData.dias_atencion,
+          "Tipo:",
+          typeof userData.dias_atencion
+        );
+
+        // Función auxiliar para verificar si un valor de tiempo es válido
+        const isValidTime = (time) => {
+          console.log(
+            "AgendaE - isValidTime recibió:",
+            time,
+            "Tipo:",
+            typeof time
+          );
+
+          // Verificar si es null, undefined, vacío o "N"
+          if (
+            !time ||
+            time === null ||
+            time === undefined ||
+            time === "" ||
+            time === "N"
+          ) {
+            console.log("AgendaE - isValidTime retorna false (valor vacío)");
+            return false;
+          }
+
+          // Verificar si es un string con formato de tiempo válido
+          if (typeof time === "string") {
+            // Formato HH:MM
+            if (time.match(/^\d{2}:\d{2}$/)) {
+              console.log("AgendaE - isValidTime retorna true (HH:MM)");
+              return true;
+            }
+            // Formato HH:MM:SS
+            if (time.match(/^\d{2}:\d{2}:\d{2}$/)) {
+              console.log("AgendaE - isValidTime retorna true (HH:MM:SS)");
+              return true;
+            }
+            // Formato numérico (ej: 900 para 9:00)
+            if (time.match(/^\d+$/)) {
+              console.log("AgendaE - isValidTime retorna true (número)");
+              return true;
+            }
+          }
+
+          // Verificar si es un objeto Date
+          if (time instanceof Date) {
+            console.log("AgendaE - isValidTime retorna true (Date)");
+            return true;
+          }
+
+          console.log(
+            "AgendaE - isValidTime retorna false (formato no reconocido)"
+          );
+          return false;
+        };
+
+        setHorario1({
+          inicio: isValidTime(userData.rango1_inicio)
+            ? formatTime(userData.rango1_inicio)
+            : "N",
+          fin: isValidTime(userData.rango1_fin)
+            ? formatTime(userData.rango1_fin)
+            : "N",
+        });
+        setHorario2({
+          inicio: isValidTime(userData.rango2_inicio)
+            ? formatTime(userData.rango2_inicio)
+            : "N",
+          fin: isValidTime(userData.rango2_fin)
+            ? formatTime(userData.rango2_fin)
+            : "N",
+        });
+
+        console.log("AgendaE - Horario1 establecido:", {
+          inicio: isValidTime(userData.rango1_inicio)
+            ? formatTime(userData.rango1_inicio)
+            : "N",
+          fin: isValidTime(userData.rango1_fin)
+            ? formatTime(userData.rango1_fin)
+            : "N",
+        });
+        console.log("AgendaE - Horario2 establecido:", {
+          inicio: isValidTime(userData.rango2_inicio)
+            ? formatTime(userData.rango2_inicio)
+            : "N",
+          fin: isValidTime(userData.rango2_fin)
+            ? formatTime(userData.rango2_fin)
+            : "N",
+        });
+
+        setRangoActual({
+          rango1: `${formatTime(userData.rango1_inicio)} - ${formatTime(
+            userData.rango1_fin
+          )}`,
+          rango2: `${formatTime(userData.rango2_inicio)} - ${formatTime(
+            userData.rango2_fin
+          )}`,
+        });
+
+        console.log("AgendaE - Rango actual establecido:", {
+          rango1: `${formatTime(userData.rango1_inicio)} - ${formatTime(
+            userData.rango1_fin
+          )}`,
+          rango2: `${formatTime(userData.rango2_inicio)} - ${formatTime(
+            userData.rango2_fin
+          )}`,
+        });
+
+        const diasAtencionArray = userData.dias_atencion
+          ? userData.dias_atencion.split(",")
+          : [];
+        console.log("AgendaE - Dias de atención array:", diasAtencionArray);
+
+        setDiasAtencion((prevState) => {
+          const newState = { ...prevState };
+          diasAtencionArray.forEach((dia) => {
+            if (dia && dia.trim() !== "") {
+              newState[dia.trim()] = true;
+            }
           });
-        } else {
-          setError(data.message || "Error al cargar datos del usuario");
-        }
+          console.log("AgendaE - Nuevo estado de días:", newState);
+          return newState;
+        });
       })
       .catch((error) => {
         console.error("Error al cargar los datos del especialista:", error);
@@ -98,6 +273,7 @@ function AgendaE() {
   }
 
   const horarios = [
+    "N",
     "08:00",
     "08:30",
     "09:00",
@@ -125,7 +301,6 @@ function AgendaE() {
     "20:00",
     "20:30",
     "21:00",
-    "N",
   ];
 
   const diasSemana = [
@@ -155,9 +330,11 @@ function AgendaE() {
       rango1_fin: horario1.fin !== "N" ? horario1.fin : null,
       rango2_inicio: horario2.inicio !== "N" ? horario2.inicio : null,
       rango2_fin: horario2.fin !== "N" ? horario2.fin : null,
-      dias_atencion: diasAtencionString,
+      dias_atencion: diasAtencionString || null,
       tipo_usuario: user.tipo_usuario,
     };
+
+    console.log("AgendaE - Enviando datos:", requestBody);
 
     fetch(`http://localhost:3003/user/${user.dni}`, {
       method: "PUT",
@@ -168,12 +345,18 @@ function AgendaE() {
     })
       .then((response) => {
         if (!response.ok) {
-          throw new Error("Error al actualizar datos");
+          return response.json().then((data) => {
+            throw new Error(data.message || "Error al actualizar datos");
+          });
         }
         return response.json();
       })
       .then((data) => {
-        if (data.success) {
+        console.log("AgendaE - Respuesta del servidor:", data);
+        if (
+          data.success ||
+          data.message === "Información actualizada correctamente"
+        ) {
           alert("Cambios guardados correctamente");
           cargarDatosUsuario(); // Recargar los datos del usuario
         } else {
@@ -182,7 +365,7 @@ function AgendaE() {
       })
       .catch((error) => {
         console.error("Error al guardar los cambios:", error);
-        alert("Error de conexión al guardar los cambios");
+        alert(error.message || "Error de conexión al guardar los cambios");
       });
   };
 

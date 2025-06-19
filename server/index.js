@@ -114,8 +114,8 @@ app.get("/user/:dni", (req, res) => {
       const user = { ...resultCliente[0] };
       delete user.contrasenia;
       return res.status(200).json({
-        success: true,
-        user: { ...user, tipo_usuario: "cliente" },
+        ...user,
+        tipo_usuario: "cliente",
       });
     } else {
       db.query(sqlEspecialista, [dni], (err, resultEspecialista) => {
@@ -130,9 +130,42 @@ app.get("/user/:dni", (req, res) => {
           // Remover contraseña de la respuesta
           const user = { ...resultEspecialista[0] };
           delete user.contrasenia;
+
+          console.log("🔍 Datos del especialista encontrado:", user);
+          console.log(
+            "⏰ Rango1_inicio:",
+            user.rango1_inicio,
+            "Tipo:",
+            typeof user.rango1_inicio
+          );
+          console.log(
+            "⏰ Rango1_fin:",
+            user.rango1_fin,
+            "Tipo:",
+            typeof user.rango1_fin
+          );
+          console.log(
+            "⏰ Rango2_inicio:",
+            user.rango2_inicio,
+            "Tipo:",
+            typeof user.rango2_inicio
+          );
+          console.log(
+            "⏰ Rango2_fin:",
+            user.rango2_fin,
+            "Tipo:",
+            typeof user.rango2_fin
+          );
+          console.log(
+            "📅 Dias_atencion:",
+            user.dias_atencion,
+            "Tipo:",
+            typeof user.dias_atencion
+          );
+
           return res.status(200).json({
-            success: true,
-            user: { ...user, tipo_usuario: "especialista" },
+            ...user,
+            tipo_usuario: "especialista",
           });
         } else {
           return res.status(404).json({
@@ -148,6 +181,9 @@ app.get("/user/:dni", (req, res) => {
 // Ruta para actualizar la información del usuario (cliente o especialista)
 app.put("/user/:dni", upload.single("imagen"), (req, res) => {
   const { dni } = req.params;
+  console.log("🔄 Actualizando usuario con DNI:", dni);
+  console.log("📝 Datos recibidos:", req.body);
+
   const {
     nombre_apellido,
     email,
@@ -165,6 +201,13 @@ app.put("/user/:dni", upload.single("imagen"), (req, res) => {
   } = req.body;
 
   const imagen = req.file ? `/fotosEs/${req.file.filename}` : null;
+  console.log("👤 Tipo de usuario:", tipo_usuario);
+  console.log("🔐 Contraseña proporcionada:", contrasenia ? "Sí" : "No");
+  console.log("⏰ Rango1_inicio:", rango1_inicio);
+  console.log("⏰ Rango1_fin:", rango1_fin);
+  console.log("⏰ Rango2_inicio:", rango2_inicio);
+  console.log("⏰ Rango2_fin:", rango2_fin);
+  console.log("📅 Dias_atencion:", dias_atencion);
 
   let sql = "";
   let values = [];
@@ -181,14 +224,42 @@ app.put("/user/:dni", upload.single("imagen"), (req, res) => {
       fieldsToUpdate.push("email = ?");
       values.push(email);
     }
-    if (contrasenia !== undefined) {
-      // Encriptar nueva contraseña si se proporciona
+    if (telefono !== undefined) {
+      fieldsToUpdate.push("telefono = ?");
+      values.push(telefono);
+    }
+
+    // Manejar contraseña de forma separada
+    if (contrasenia !== undefined && contrasenia !== "") {
+      // Encriptar nueva contraseña solo si se proporciona una no vacía
       const { hashPassword } = require("./utils/auth");
       hashPassword(contrasenia)
         .then((hashedPassword) => {
-          fieldsToUpdate.push("contrasenia = ?");
-          values.push(hashedPassword);
-          executeUpdate();
+          // Agregar la contraseña encriptada a los campos a actualizar
+          const finalFields = [...fieldsToUpdate, "contrasenia = ?"];
+          const finalValues = [...values, hashedPassword];
+
+          const finalSql =
+            "UPDATE clientes SET " + finalFields.join(", ") + " WHERE dni = ?";
+          finalValues.push(dni);
+
+          console.log("🔧 Ejecutando consulta SQL con contraseña:", finalSql);
+          console.log("📊 Valores:", finalValues);
+
+          db.query(finalSql, finalValues, (err, result) => {
+            if (err) {
+              console.error("❌ Error en la consulta SQL:", err);
+              return res.status(500).json({
+                success: false,
+                message: "Error interno del servidor",
+              });
+            }
+            console.log("✅ Actualización exitosa con contraseña");
+            res.status(200).json({
+              success: true,
+              message: "Información actualizada correctamente",
+            });
+          });
         })
         .catch((error) => {
           console.error("Error al encriptar contraseña:", error);
@@ -199,9 +270,13 @@ app.put("/user/:dni", upload.single("imagen"), (req, res) => {
         });
       return;
     }
-    if (telefono !== undefined) {
-      fieldsToUpdate.push("telefono = ?");
-      values.push(telefono);
+
+    // Si no hay contraseña, ejecutar actualización normal
+    if (fieldsToUpdate.length === 0) {
+      return res.status(400).json({
+        success: false,
+        message: "No hay campos para actualizar",
+      });
     }
 
     sql += fieldsToUpdate.join(", ");
@@ -218,24 +293,6 @@ app.put("/user/:dni", upload.single("imagen"), (req, res) => {
     if (email !== undefined) {
       fieldsToUpdate.push("email = ?");
       values.push(email);
-    }
-    if (contrasenia !== undefined) {
-      // Encriptar nueva contraseña si se proporciona
-      const { hashPassword } = require("./utils/auth");
-      hashPassword(contrasenia)
-        .then((hashedPassword) => {
-          fieldsToUpdate.push("contrasenia = ?");
-          values.push(hashedPassword);
-          executeUpdate();
-        })
-        .catch((error) => {
-          console.error("Error al encriptar contraseña:", error);
-          return res.status(500).json({
-            success: false,
-            message: "Error al actualizar contraseña",
-          });
-        });
-      return;
     }
     if (telefono !== undefined) {
       fieldsToUpdate.push("telefono = ?");
@@ -278,6 +335,58 @@ app.put("/user/:dni", upload.single("imagen"), (req, res) => {
       values.push(dias_atencion);
     }
 
+    // Manejar contraseña de forma separada
+    if (contrasenia !== undefined && contrasenia !== "") {
+      // Encriptar nueva contraseña solo si se proporciona una no vacía
+      const { hashPassword } = require("./utils/auth");
+      hashPassword(contrasenia)
+        .then((hashedPassword) => {
+          // Agregar la contraseña encriptada a los campos a actualizar
+          const finalFields = [...fieldsToUpdate, "contrasenia = ?"];
+          const finalValues = [...values, hashedPassword];
+
+          const finalSql =
+            "UPDATE especialistas SET " +
+            finalFields.join(", ") +
+            " WHERE dni = ?";
+          finalValues.push(dni);
+
+          console.log("🔧 Ejecutando consulta SQL con contraseña:", finalSql);
+          console.log("📊 Valores:", finalValues);
+
+          db.query(finalSql, finalValues, (err, result) => {
+            if (err) {
+              console.error("❌ Error en la consulta SQL:", err);
+              return res.status(500).json({
+                success: false,
+                message: "Error interno del servidor",
+              });
+            }
+            console.log("✅ Actualización exitosa con contraseña");
+            res.status(200).json({
+              success: true,
+              message: "Información actualizada correctamente",
+            });
+          });
+        })
+        .catch((error) => {
+          console.error("Error al encriptar contraseña:", error);
+          return res.status(500).json({
+            success: false,
+            message: "Error al actualizar contraseña",
+          });
+        });
+      return;
+    }
+
+    // Si no hay contraseña, ejecutar actualización normal
+    if (fieldsToUpdate.length === 0) {
+      return res.status(400).json({
+        success: false,
+        message: "No hay campos para actualizar",
+      });
+    }
+
     sql += fieldsToUpdate.join(", ");
     sql += " WHERE dni = ?";
     values.push(dni);
@@ -290,14 +399,18 @@ app.put("/user/:dni", upload.single("imagen"), (req, res) => {
   }
 
   function executeUpdate() {
+    console.log("🔧 Ejecutando consulta SQL:", sql);
+    console.log("📊 Valores:", values);
+
     db.query(sql, values, (err, result) => {
       if (err) {
-        console.error("Error en la consulta SQL:", err);
+        console.error("❌ Error en la consulta SQL:", err);
         return res.status(500).json({
           success: false,
           message: "Error interno del servidor",
         });
       }
+      console.log("✅ Actualización exitosa");
       res.status(200).json({
         success: true,
         message: "Información actualizada correctamente",
@@ -455,6 +568,10 @@ app.get("/turnos-especialista/:dni_especialista", (req, res) => {
   const { dni_especialista } = req.params;
   const { fecha_inicio, fecha_fin } = req.query;
 
+  console.log("🔍 Buscando turnos para especialista:", dni_especialista);
+  console.log("📅 Fecha inicio:", fecha_inicio);
+  console.log("📅 Fecha fin:", fecha_fin);
+
   const sql = `
         SELECT t.id, t.fecha, t.hora, c.nombre_apellido AS nombre, c.email, c.telefono 
         FROM turnos t 
@@ -464,14 +581,18 @@ app.get("/turnos-especialista/:dni_especialista", (req, res) => {
         ORDER BY t.fecha, t.hora
     `;
 
+  console.log("🔧 SQL Query:", sql);
+  console.log("📊 Parámetros:", [dni_especialista, fecha_inicio, fecha_fin]);
+
   db.query(sql, [dni_especialista, fecha_inicio, fecha_fin], (err, results) => {
     if (err) {
-      console.error("Error al obtener los turnos:", err);
+      console.error("❌ Error al obtener los turnos:", err);
       return res.status(500).json({
         success: false,
         message: "Error interno del servidor",
       });
     }
+    console.log("✅ Turnos encontrados:", results);
     res.status(200).json({
       success: true,
       data: results,

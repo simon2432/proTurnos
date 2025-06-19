@@ -381,7 +381,7 @@ function AgendaC() {
         {modalVisible && (
           <div className="modal">
             <div className="modal-content">
-              <p>
+              <p style={{ color: "#000" }}>
                 ¿Reservar turno el {selectedDay}/{selectedMonth}/{selectedYear}{" "}
                 a las {turnoSeleccionado?.hora}?
               </p>

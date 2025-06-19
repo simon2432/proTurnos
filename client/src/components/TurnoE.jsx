@@ -37,7 +37,7 @@ export function TurnoE({ turno, onVolver, cargarTurnos }) {
   };
 
   return (
-    <div className="modal">
+    <div className="turno-container">
       <div className="turno-detalles">
         <div className="turno-infoo">
           <span className="tu">Turno</span>

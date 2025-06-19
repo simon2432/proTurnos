@@ -150,7 +150,7 @@ function TurnosE() {
                     {dias.map((dia) => (
                       <th key={dia.nombre}>{`${
                         dia.nombre
-                      } ${dia.fecha.getDate()}/$${
+                      } ${dia.fecha.getDate()}/${
                         dia.fecha.getMonth() + 1
                       }`}</th>
                     ))}

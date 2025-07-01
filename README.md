@@ -1,6 +1,6 @@
 # 🚀 Servidor proTurnos
 
-Servidor backend para la aplicación de gestión de turnos médicos.
+Software para la gestión de turnos médicos.
 
 ## 📋 Requisitos Previos
 
